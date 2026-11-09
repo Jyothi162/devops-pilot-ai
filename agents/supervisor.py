@@ -1,4 +1,4 @@
-
+import os
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -21,6 +21,10 @@ class SupervisorDecision(BaseModel):
 llm = ChatOllama(
     model="llama3.2",
     temperature=0,
+    base_url=os.getenv(
+        "OLLAMA_BASE_URL",
+        "http://localhost:11434"
+    ),
 )
 
 # Request structured output from Ollama

@@ -1,3 +1,4 @@
+﻿import os
 
 import json
 
@@ -10,6 +11,10 @@ from agents.state import DevOpsState
 llm = ChatOllama(
     model="llama3.2",
     temperature=0,
+    base_url=os.getenv(
+        "OLLAMA_BASE_URL",
+        "http://localhost:11434"
+    ),
 )
 
 
@@ -62,3 +67,4 @@ def diagnosis_agent(state: DevOpsState) -> dict:
     return {
         "diagnosis": str(response.content)
     }
+

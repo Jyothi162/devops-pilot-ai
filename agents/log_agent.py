@@ -1,3 +1,4 @@
+﻿import os
 
 from typing import Literal
 
@@ -24,6 +25,10 @@ class LogToolDecision(BaseModel):
 llm = ChatOllama(
     model="llama3.2",
     temperature=0,
+    base_url=os.getenv(
+        "OLLAMA_BASE_URL",
+        "http://localhost:11434"
+    ),
 )
 
 tool_selector = llm.with_structured_output(
@@ -95,3 +100,4 @@ def log_agent(state: DevOpsState) -> dict:
     return {
         "log_result": result
     }
+

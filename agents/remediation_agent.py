@@ -1,3 +1,4 @@
+﻿import os
 
 from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -8,6 +9,10 @@ from agents.state import DevOpsState
 llm = ChatOllama(
     model="llama3.2",
     temperature=0,
+    base_url=os.getenv(
+        "OLLAMA_BASE_URL",
+        "http://localhost:11434"
+    ),
 )
 
 
@@ -58,3 +63,4 @@ def remediation_agent(state: DevOpsState) -> dict:
     return {
         "remediation": str(response.content)
     }
+

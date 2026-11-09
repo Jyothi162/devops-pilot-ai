@@ -1,3 +1,4 @@
+﻿import os
 
 from typing import Literal
 
@@ -27,6 +28,10 @@ class InfrastructureToolDecision(BaseModel):
 llm = ChatOllama(
     model="llama3.2",
     temperature=0,
+    base_url=os.getenv(
+        "OLLAMA_BASE_URL",
+        "http://localhost:11434"
+    ),
 )
 
 tool_selector = llm.with_structured_output(
@@ -102,3 +107,4 @@ def infrastructure_agent(state: DevOpsState) -> dict:
     return {
         "infrastructure_result": result
     }
+
