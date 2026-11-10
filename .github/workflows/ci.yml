@@ -59,9 +59,38 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      
       - name: Build and publish Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ghcr.io/jyothi162/devops-pilot-ai:latest
+          tags: |
+            ghcr.io/jyothi162/devops-pilot-ai:latest
+            ghcr.io/jyothi162/devops-pilot-ai:sha-${{ github.sha }}
+
+
+  deploy:
+    name: Deploy to Azure Container Apps
+    runs-on: ubuntu-latest
+    needs: docker
+    if: github.event_name != 'pull_request'
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Log in to Azure using OIDC
+        uses: azure/login@v2
+        with:
+          client-id: 6e98e704-94b8-4ea6-8330-232dc9c0bbdf
+          tenant-id: f419c9fe-f7b0-4d87-bee8-e8dfb2190cab
+          subscription-id: 2d00d166-4074-41c6-8f61-d07cbc0cc012
+
+      - name: Deploy Docker image to Azure
+        run: |
+          az containerapp update \
+            --name devops-pilot-ai \
+            --resource-group rg-devops-pilot-ai \
+            --image ghcr.io/jyothi162/devops-pilot-ai:sha-${{ github.sha }}
