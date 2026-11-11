@@ -1,7 +1,8 @@
-from langfuse.langchain import CallbackHandler
+
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
+from langfuse.langchain import CallbackHandler
 
 from agents.graph import graph
 
@@ -48,11 +49,11 @@ async def investigate(request: InvestigationRequest):
 
     langfuse_handler = CallbackHandler()
 
-result = await run_in_threadpool(
-    graph.invoke,
-    initial_state,
-    config={"callbacks": [langfuse_handler]},
-)
+    result = await run_in_threadpool(
+        graph.invoke,
+        initial_state,
+        config={"callbacks": [langfuse_handler]},
+    )
 
     return {
         "service_name": request.service_name,
