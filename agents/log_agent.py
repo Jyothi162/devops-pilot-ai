@@ -94,3 +94,4 @@ def log_agent(state: DevOpsState) -> dict:
     return {
         "log_result": result
     }
+

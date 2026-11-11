@@ -1,62 +1,50 @@
 ﻿
-import json
-
-from langchain_core.messages import HumanMessage, SystemMessage
-
-from agents.llm_config import get_llm
 from agents.state import DevOpsState
-
-
-# Use the shared LLM configuration
-llm = get_llm()
+from agents.llm_config import get_llm
 
 
 def diagnosis_agent(state: DevOpsState) -> dict:
     """
-    Diagnosis Agent:
-    Analyzes infrastructure health and log evidence.
+    Analyze infrastructure metrics and application logs
+    using the configured LLM.
+
+    Identify possible root causes without claiming
+    that unverified hypotheses are confirmed.
     """
 
-    service_name = state["service_name"]
+    metrics = state.get("infrastructure_result", {})
+    logs = state.get("log_result", {})
 
-    infrastructure = state["infrastructure_result"]
-    logs = state["log_result"]
+    print("[Diagnosis Agent] Analyzing incident...")
 
-    system_prompt = """
-    You are a DevOps Diagnosis Agent.
+    prompt = f"""
+You are an experienced DevOps incident analyst.
 
-    Your responsibility is to identify likely causes
-    of application or infrastructure failures.
+Analyze the following simulated incident.
 
-    Analyze only the supplied health-check results
-    and application logs.
+Infrastructure metrics:
+{metrics}
 
-    Instructions:
-    1. Summarize the observed service status.
-    2. Identify the most relevant errors.
-    3. Explain the most likely root cause.
-    4. Distinguish observations from hypotheses.
-    5. State what additional evidence is needed
-       to confirm the root cause.
+Application logs:
+{logs}
 
-    Do not invent monitoring results or tool outputs.
-    Do not claim to have executed commands.
-    Do not perform remediation.
-    """
+Instructions:
+1. Identify up to three possible root causes.
+2. Explain how the metrics and logs support each cause.
+3. Identify what additional evidence is needed.
+4. Do not claim a root cause is confirmed without proof.
+5. Distinguish observations from hypotheses.
+6. Do not execute commands or suggest destructive actions.
+7. Do not assume a particular database technology
+   unless it is explicitly identified in the evidence.
+8. Clearly state when evidence is insufficient.
 
-    evidence = {
-        "service_name": service_name,
-        "infrastructure": infrastructure,
-        "logs": logs,
-    }
+Provide a concise technical diagnosis.
+"""
 
-    response = llm.invoke([
-        SystemMessage(content=system_prompt),
-        HumanMessage(
-            content=json.dumps(evidence, indent=2)
-        ),
-    ])
+    llm = get_llm()
+    response = llm.invoke(prompt)
 
     return {
-        "diagnosis": str(response.content)
+        "diagnosis": response.content
     }
