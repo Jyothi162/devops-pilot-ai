@@ -2,25 +2,42 @@
 import os
 
 from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 
 
 def get_llm():
     """
-    Create a shared LLM instance for DevOps Pilot AI.
+    Shared LLM configuration for DevOps Pilot AI.
 
-    Default provider: Local Ollama
-    Default model: Llama 3.2
+    Local: Ollama
+    Cloud: Groq
     """
 
-    model_name = os.getenv("OLLAMA_MODEL", "llama3.2")
+    provider = os.getenv("LLM_PROVIDER", "ollama").lower()
 
-    base_url = os.getenv(
-        "OLLAMA_BASE_URL",
-        "http://localhost:11434"
-    )
+    if provider == "groq":
+        api_key = os.getenv("GROQ_API_KEY")
 
-    return ChatOllama(
-        model=model_name,
-        temperature=0,
-        base_url=base_url
-    )
+        if not api_key:
+            raise ValueError(
+                "GROQ_API_KEY is required when LLM_PROVIDER=groq"
+            )
+
+        return ChatOpenAI(
+            model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+            api_key=api_key,
+            base_url="https://api.groq.com/openai/v1",
+            temperature=0,
+        )
+
+    if provider == "ollama":
+        return ChatOllama(
+            model=os.getenv("OLLAMA_MODEL", "llama3.2"),
+            base_url=os.getenv(
+                "OLLAMA_BASE_URL",
+                "http://localhost:11434"
+            ),
+            temperature=0,
+        )
+
+    raise ValueError(f"Unsupported LLM_PROVIDER: {provider}")
