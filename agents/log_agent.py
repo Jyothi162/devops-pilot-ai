@@ -1,11 +1,10 @@
-﻿import os
-
+﻿
 from typing import Literal
 
 from pydantic import BaseModel, Field
-from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from agents.llm_config import get_llm
 from agents.state import DevOpsState
 from mcp_client.tool_executor import (
     list_available_tools,
@@ -22,15 +21,10 @@ class LogToolDecision(BaseModel):
     )
 
 
-llm = ChatOllama(
-    model="llama3.2",
-    temperature=0,
-    base_url=os.getenv(
-        "OLLAMA_BASE_URL",
-        "http://localhost:11434"
-    ),
-)
+# Use the shared LLM configuration
+llm = get_llm()
 
+# Configure structured output for tool selection
 tool_selector = llm.with_structured_output(
     LogToolDecision,
     method="json_schema",
@@ -41,7 +35,7 @@ def log_agent(state: DevOpsState) -> dict:
     """
     Log Analysis Agent:
     Discovers MCP tools, selects a permitted tool
-    using Llama 3.2, and retrieves service logs.
+    using the configured LLM, and retrieves service logs.
     """
 
     service_name = state["service_name"]
@@ -61,7 +55,7 @@ def log_agent(state: DevOpsState) -> dict:
             "No permitted log analysis MCP tools available"
         )
 
-    # Ask Llama 3.2 to select the tool
+    # Ask the LLM to select the tool
     decision = tool_selector.invoke([
         SystemMessage(
             content=(
@@ -100,4 +94,3 @@ def log_agent(state: DevOpsState) -> dict:
     return {
         "log_result": result
     }
-

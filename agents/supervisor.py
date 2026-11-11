@@ -1,10 +1,10 @@
-import os
+
 from typing import Literal
 
 from pydantic import BaseModel, Field
-from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from agents.llm_config import get_llm
 from agents.state import DevOpsState
 
 
@@ -18,16 +18,10 @@ class SupervisorDecision(BaseModel):
     )
 
 
-llm = ChatOllama(
-    model="llama3.2",
-    temperature=0,
-    base_url=os.getenv(
-        "OLLAMA_BASE_URL",
-        "http://localhost:11434"
-    ),
-)
+# Use the shared LLM configuration
+llm = get_llm()
 
-# Request structured output from Ollama
+# Request structured output from the LLM
 router_llm = llm.with_structured_output(
     SupervisorDecision,
     method="json_schema",

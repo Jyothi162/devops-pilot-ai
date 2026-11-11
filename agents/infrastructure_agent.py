@@ -1,11 +1,10 @@
-﻿import os
-
+﻿
 from typing import Literal
 
 from pydantic import BaseModel, Field
-from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from agents.llm_config import get_llm
 from agents.state import DevOpsState
 from mcp_client.tool_executor import (
     list_available_tools,
@@ -25,15 +24,10 @@ class InfrastructureToolDecision(BaseModel):
     )
 
 
-llm = ChatOllama(
-    model="llama3.2",
-    temperature=0,
-    base_url=os.getenv(
-        "OLLAMA_BASE_URL",
-        "http://localhost:11434"
-    ),
-)
+# Use the shared LLM configuration
+llm = get_llm()
 
+# Configure structured output for tool selection
 tool_selector = llm.with_structured_output(
     InfrastructureToolDecision,
     method="json_schema",
@@ -107,4 +101,3 @@ def infrastructure_agent(state: DevOpsState) -> dict:
     return {
         "infrastructure_result": result
     }
-
