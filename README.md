@@ -17,6 +17,36 @@ The platform checks service health, retrieves application logs, analyzes possibl
 
 ## System Architecture
 
+
+```mermaid
+flowchart TD
+    U["User / Swagger UI"] --> API["FastAPI - Azure Container Apps"]
+    API --> S["LangGraph Supervisor"]
+
+    S --> I["Infrastructure Agent"]
+    S --> L["Log Agent"]
+    S --> D["Diagnosis Agent"]
+    S --> R["Remediation Agent"]
+
+    I --> MCP["Custom MCP Server / Client"]
+    L --> MCP
+    MCP --> DATA["Simulated Infrastructure and Logs"]
+
+    S --> LLM["Groq Cloud / Local Ollama"]
+    D --> LLM
+    R --> LLM
+
+    R --> OUT["Safe Remediation Recommendations"]
+
+    S -.-> LF["Langfuse Observability"]
+    D -.-> LF
+    R -.-> LF
+
+    CI["GitHub Actions CI/CD"] --> GHCR["Docker Image - GHCR"]
+    GHCR --> AZ["Azure Deployment via OIDC"]
+    AZ --> API
+```
+
 ```text
 User / Swagger UI
        |
