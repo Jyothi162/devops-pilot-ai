@@ -45,30 +45,9 @@ flowchart TD
     CI["GitHub Actions CI/CD"] --> GHCR["Docker Image - GHCR"]
     GHCR --> AZ["Azure Deployment via OIDC"]
     AZ --> API
-```
 
-```text
-User / Swagger UI
-       |
-       v
-FastAPI REST API (Azure Container Apps)
-       |
-       v
-LangGraph Supervisor
-       |
-       +--> Infrastructure Agent --> Custom MCP Tools
-       |
-       +--> Log Agent ------------> Custom MCP Tools
-       |
-       +--> Diagnosis Agent ------> Groq LLM
-       |
-       +--> Remediation Agent ----> Groq LLM
-       |
-       v
-Investigation Results
-       |
-       v
-Langfuse Observability
+
+
 ```
 
 Langfuse traces the LangGraph workflow and supported LLM operations.
@@ -153,6 +132,7 @@ The deployment pipeline follows this sequence:
 5. Update the Azure Container App with the new image.
 
 Application secrets, including Groq and Langfuse credentials, are managed using Azure Container Apps Secrets rather than hardcoded into the source code.
+
 ## Observability
 
 Langfuse provides visibility into LangGraph execution, individual agent steps, and supported LLM calls.
